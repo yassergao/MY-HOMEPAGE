@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高源秀 · Gao Yuanxiu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --border: #1e1e2e;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --accent: #ff4e1a;
+      --accent2: #ffa040;
+      --glow: rgba(255, 78, 26, 0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Serif SC', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── noise overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    /* ── hero ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 6vw, 8rem);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 40%, rgba(255,78,26,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 10% 70%, rgba(255,160,64,0.05) 0%, transparent 60%);
+    }
+
+    .grid-lines {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+      mask-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.6) 70%, transparent);
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 900px; }
+
+    .label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s forwards;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 9vw, 7.5rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.25s forwards;
+    }
+
+    h1 .en {
+      display: block;
+      font-size: clamp(1rem, 2.5vw, 1.6rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-top: 0.4em;
+    }
+
+    h1 .fire {
+      color: var(--accent);
+      -webkit-text-stroke: 1px var(--accent);
+    }
+
+    .tagline {
+      font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+
+    .tags {
+      display: flex; flex-wrap: wrap; gap: 0.7rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.55s forwards;
+    }
+
+    .tag {
+      padding: 0.4em 1em;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--glow);
+    }
+    .tag.hot { border-color: rgba(255,78,26,0.4); color: var(--accent2); }
+
+    /* ── scroll hint ── */
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      opacity: 0; animation: fadeUp 1s 1s forwards;
+      z-index: 1;
+    }
+    .scroll-hint span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ── sections ── */
+    section {
+      padding: clamp(3rem, 7vw, 6rem) clamp(1.5rem, 6vw, 8rem);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.25em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* ── about ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .about-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+    .about-text {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 2;
+      color: var(--muted);
+    }
+    .about-text strong { color: var(--text); font-weight: 600; }
+
+    .stats {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .stat {
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      transition: transform 0.2s;
+    }
+    .stat:hover { transform: translateX(4px); }
+    .stat-num {
+      font-size: 2.5rem; font-weight: 900;
+      color: var(--accent); line-height: 1;
+      font-family: 'Space Mono', monospace;
+    }
+    .stat-desc { font-size: 0.85rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── interests ── */
+    .interest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .interest-card {
+      background: var(--bg);
+      padding: 2rem 1.8rem;
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .interest-card:hover { background: var(--surface); }
+
+    .interest-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .interest-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .interest-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.7; }
+
+    /* ── footer ── */
+    footer {
+      padding: 3rem clamp(1.5rem, 6vw, 8rem);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      position: relative; z-index: 1;
+    }
+    .footer-name { font-weight: 900; font-size: 1.1rem; }
+    .footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── section fade-in on scroll ── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s, transform 0.7s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="grid-lines"></div>
+    <div class="hero-content">
+      <p class="label">// Personal Page · 个人主页</p>
+      <h1>
+        高源秀
+        <span class="en">GAO &nbsp; YUAN&thinsp;XIU</span>
+      </h1>
+      <p class="tagline">
+        消防救援站副站长 · 无人机航拍创作者 · 启东人<br/>
+        用镜头记录家乡，用代码探索世界。
+      </p>
+      <div class="tags">
+        <span class="tag hot">🔥 消防救援</span>
+        <span class="tag">🚁 无人机航拍</span>
+        <span class="tag">📍 启东 · 上海</span>
+        <span class="tag">🎯 FPV 飞行</span>
+        <span class="tag">📱 独立开发</span>
+        <span class="tag">🤖 AI 探索者</span>
+        <span class="tag">🚲 骑行</span>
+        <span class="tag">🎣 钓鱼</span>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span>向下滚动</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section>
+    <p class="section-label reveal">01 · 关于我</p>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        我是<strong>高源秀</strong>，目前担任<strong>真如消防救援站副站长</strong>，
+        带领约 40 人的团队守护这片土地。<br/><br/>
+        从消防员到驾驶员，再到副站长——这条路让我深刻明白：
+        <strong>每一次训练，都是为了那一刻不慌乱</strong>。<br/><br/>
+        工作之外，我是一名<strong>无人机航拍爱好者</strong>，
+        镜头对准的是家乡启东的江海与烟火。
+        同时也在慢慢学习独立开发，
+        用 AI 把脑子里的想法变成真实的产品。
+      </div>
+      <div class="stats reveal">
+        <div class="stat">
+          <div class="stat-num">40+</div>
+          <div class="stat-desc">团队成员 · 真如消防救援站</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">∞</div>
+          <div class="stat-desc">启东上空拍摄的日出日落</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">Day 1</div>
+          <div class="stat-desc">独立开发者之路 · 刚刚开始</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERESTS -->
+  <section>
+    <p class="section-label reveal">02 · 我在做的事</p>
+    <div class="interest-grid reveal">
+      <div class="interest-card">
+        <div class="interest-icon">🚁</div>
+        <div class="interest-title">无人机航拍</div>
+        <div class="interest-desc">用 DJI 和 FPV 记录启东的江海风貌，在抖音分享家乡的美。TX16S 遥控器是我最爱的玩具。</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-icon">🔥</div>
+        <div class="interest-title">消防专业训练</div>
+        <div class="interest-desc">研究认知科学在消防训练中的应用——间隔重复、情境学习，让40个人都能更快成长。</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-icon">🤖</div>
+        <div class="interest-title">AI 与独立开发</div>
+        <div class="interest-desc">用 Claude 生成代码，探索用技术工具解决真实问题。正在学习 Vercel、Supabase 这套现代工具栈。</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-icon">📚</div>
+        <div class="interest-title">学习系统搭建</div>
+        <div class="interest-desc">Anki、Obsidian、费曼学习法……在繁忙的工作中，想用最少的时间学最多的东西。</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-icon">🚲</div>
+        <div class="interest-title">骑行 / 钓鱼 / 棒球</div>
+        <div class="interest-desc">工作高压下的解压方式。路上、水边、球场——都是让大脑重启的地方。</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-icon">📍</div>
+        <div class="interest-title">启东情结</div>
+        <div class="interest-desc">长江入海口的那座小城，是我永远想用镜头记录的地方。江鲜、方言、海风。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-name">高源秀</span>
+    <span class="footer-copy">MADE WITH CLAUDE · 2025 · SHANGHAI</span>
+  </footer>
+
+  <script>
+    // scroll reveal
+    const els = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
